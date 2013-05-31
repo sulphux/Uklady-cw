@@ -1,6 +1,6 @@
-
 #define RS 0b00000001
 #define E 0b00000010
+#define UNUSED 0b00001100
 #define F_CPU 16000000UL
 
 #include <avr/io.h>
@@ -8,14 +8,16 @@
 
 void SendLoByte ( uint8_t data )
 {
-    PORTA = E | ((data << 4) & 0x0F) | (PORTA & 0b00001100);
-    PORTA = PORTA & (~E);
-    
+    PORTA |= E;
+    PORTA = (PORTA&(RS|UNUSED)) | E | (data<<4 & 0xF0);
+    PORTA &= ~E;
+
 }
 void SendHiByte ( uint8_t data )
 {
-    PORTA = E | ( data & 0xF0 ) | ( PORTA & 0b00001100 );
-    PORTA = PORTA & (~E);
+    PORTA |= E;
+    PORTA = (PORTA&(RS|UNUSED)) | E | (data & 0xF0);
+    PORTA &= ~E;
 }
 
 void SendByte ( uint8_t data )
@@ -62,9 +64,9 @@ void InitScreen()
 
 void WriteText(char * napis)
 {
-    while(*x != '\0'){
-                sendData(*x);
-                x++;
+    while(*napis){
+                SendDataByte(*napis);
+                napis++;
         }
 }
 
@@ -76,6 +78,6 @@ int main(void)
 	InitScreen();
     while(1)
     {
-        //TODO:: Please write your application code 
+        //TODO:: Please write your application code
     }
 }
